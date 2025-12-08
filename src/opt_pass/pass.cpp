@@ -7,7 +7,8 @@
 
 using namespace llvm;
 
-struct CheckPass : public PassInfoMixin<CheckPass> {
+class CheckPass : public PassInfoMixin<CheckPass> {
+public:
   PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM) {
     errs() << "Running pass on " << F.getName() << "\n";
     return PreservedAnalyses::none();
@@ -22,7 +23,7 @@ extern "C" ::llvm::PassPluginLibraryInfo llvmGetPassPluginInfo() {
                 [](StringRef Name, FunctionPassManager &FPM,
                    ArrayRef<PassBuilder::PipelineElement>) {
                   if (Name == "CheckPass") {
-                    FPM.addPass(CheckPass());
+                    FPM.addPass(createModuleToFunctionPassAdaptor(CheckPass()));
                     return true;
                   }
                   return false;
