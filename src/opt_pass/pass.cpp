@@ -11,8 +11,19 @@ class CheckPass : public PassInfoMixin<CheckPass> {
 public:
   PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM) {
     errs() << "Running pass on " << F.getName() << "\n";
+
+    for (BasicBlock &BB : F) {
+      errs() << BB.getName() << " block\n";
+
+      for (Instruction &I : BB) {
+        errs() << I.getOpcodeName() << "\n";
+      }
+    }
+
     return PreservedAnalyses::none();
   }
+
+  static bool isRequired() { return true; }
 };
 
 extern "C" ::llvm::PassPluginLibraryInfo llvmGetPassPluginInfo() {
@@ -23,7 +34,7 @@ extern "C" ::llvm::PassPluginLibraryInfo llvmGetPassPluginInfo() {
                 [](StringRef Name, FunctionPassManager &FPM,
                    ArrayRef<PassBuilder::PipelineElement>) {
                   if (Name == "CheckPass") {
-                    FPM.addPass(createModuleToFunctionPassAdaptor(CheckPass()));
+                    FPM.addPass(CheckPass());
                     return true;
                   }
                   return false;
