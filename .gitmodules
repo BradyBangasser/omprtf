@@ -1,0 +1,3 @@
+[submodule "ompdataperf"]
+	path = ompdataperf
+	url = https://github.com/lmarzen/ompdataperf
