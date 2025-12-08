@@ -1,18 +1,13 @@
-#include <stdio.h>
+#include <stdlib.h>
 
-int test() {
-  printf("HELP\n");
-  return 0;
-}
+#define N 1000000
 
 int main() {
-  int x[200000] = {};
+  int *x = malloc(N * sizeof(int));
 #pragma omp target map(tofrom : x)
-  for (int i = 0; i < sizeof(x) / sizeof(*x); i++) {
+  for (int i = 0; i < N; i++) {
     x[i] = i;
   }
-
-  test();
 
   return 0;
 }
