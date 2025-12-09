@@ -14,7 +14,7 @@ target_link_libraries(cmeta.out
         logging
         cmeta
         LLVM
-
+        LLVMIRReader
 )
 
 set_property(TARGET cmeta PROPERTY C_STANDARD 23)
