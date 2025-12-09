@@ -5,3 +5,7 @@
 *.S
 *.ll
 *.so
+*.a
+*.so
+
+build

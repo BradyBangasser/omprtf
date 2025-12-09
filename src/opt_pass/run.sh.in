@@ -1,0 +1,4 @@
+#!/bin/bash
+PASS="@PASS_SO_ABSPATH@"
+
+opt -load-pass-plugin="$PASS" -passes="function(CheckPass)" $1 -o /dev/null
