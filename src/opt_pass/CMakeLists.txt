@@ -12,7 +12,7 @@ set_target_properties(opt_pass PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
 )
 
-set(PASS_SO_ABSPATH "${CMAKE_BINARY_DIR}/libpass.so")
+set(PASS_SO_ABSPATH "${CMAKE_BINARY_DIR}/libopt_pass.so")
 
 set(RUN_SCRIPT ${CMAKE_BINARY_DIR}/run_opt_pass.sh)
 
