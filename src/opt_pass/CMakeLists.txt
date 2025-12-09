@@ -13,9 +13,9 @@ add_library(opt_pass SHARED pass.cpp)
 
 target_compile_options(opt_pass PRIVATE ${LLVM_CXXFLAGS_LIST})
 
-llvm_map_components_to_libnames(llvm_libs support core irreader)
+find_package(LLVM CONFIG REQUIRED)
 
-target_link_libraries(opt_pass PRIVATE ${llvm_libs})
+target_link_libraries(opt_pass PRIVATE LLVM)
 
 set_target_properties(opt_pass PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
