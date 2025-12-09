@@ -9,11 +9,14 @@ target_include_directories(cmeta
         ${LLVM_INCLUDE_DIRS}
 )
 
+llvm_map_components_to_libnames(LLVM_LIBS core)
+
 target_link_libraries(cmeta.out
     PRIVATE
         logging
-        LLVM
         cmeta
+        ${LLVM_LIBS}
+
 )
 
 set_property(TARGET cmeta PROPERTY C_STANDARD 23)

@@ -1,21 +1,12 @@
+message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
+
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-execute_process(
-    COMMAND llvm-config --cxxflags
-    OUTPUT_VARIABLE LLVM_CXXFLAGS
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-
-string(REPLACE " " ";" LLVM_CXXFLAGS_LIST ${LLVM_CXXFLAGS})
-list(REMOVE_ITEM LLVM_CXXFLAGS_LIST "")
 
 add_library(opt_pass SHARED pass.cpp)
 
-target_compile_options(opt_pass PRIVATE ${LLVM_CXXFLAGS_LIST})
+llvm_map_components_to_libnames(LLVM_LIBS core support passes)
 
-find_package(LLVM CONFIG REQUIRED)
-
-target_link_libraries(opt_pass PRIVATE LLVM LLVMCore LLVMSupport LLVMTargetParser LLVMBinaryFormat LLVMRemarks LLVMDemangle LLVMBitstreamReader)
+target_link_libraries(opt_pass PRIVATE ${LLVM_LIBS})
 
 set_target_properties(opt_pass PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
