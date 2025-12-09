@@ -9,13 +9,11 @@ target_include_directories(cmeta
         ${LLVM_INCLUDE_DIRS}
 )
 
-llvm_map_components_to_libnames(LLVM_LIBS core irreader support)
-
 target_link_libraries(cmeta.out
     PRIVATE
         logging
         cmeta
-        ${LLVM_LIBS}
+        LLVM
 
 )
 

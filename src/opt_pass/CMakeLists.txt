@@ -4,9 +4,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_library(opt_pass SHARED pass.cpp)
 
-llvm_map_components_to_libnames(LLVM_LIBS core support passes)
-
-target_link_libraries(opt_pass PRIVATE ${LLVM_LIBS})
+target_link_libraries(opt_pass PRIVATE LLVM)
 
 set_target_properties(opt_pass PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
