@@ -13,8 +13,11 @@ target_link_libraries(cmeta.out
     PRIVATE
         logging
         cmeta
-        LLVM
+        LLVMSupport
         LLVMIRReader
+        LLVMCore
+        LLVMAsmParser
+        LLVMDebugInfoPDB
 )
 
 set_property(TARGET cmeta PROPERTY C_STANDARD 23)
