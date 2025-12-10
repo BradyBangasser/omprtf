@@ -2,19 +2,20 @@ cmake_minimum_required(VERSION 3.12)
 
 project(OMPDataPerf C CXX)
 
-find_program(LLVM_CONFIG llvm-config)
+find_program(CLANG_EXE clang)
 
-if (LLVM_CONFIG)
+if (CLANG_EXE)
   execute_process(
-    COMMAND ${LLVM_CONFIG} --includedir
-    OUTPUT_VARIABLE LLVM_INCLUDE_DIR
+    COMMAND ${CLANG_EXE} -print-resource-dir
+    OUTPUT_VARIABLE CLANG_RESOURCE_DIR
     OUTPUT_STRIP_TRAILING_WHITESPACE
   )
 
-  message(STATUS "LLVM include dir: ${LLVM_INCLUDE_DIR}")
-  include_directories(LLVM_INCLUDE_DIRS)
-else()
-  message(FATAL_ERROR "llvm-config not found")
+  set(CLANG_INCLUDE_DIR "${CLANG_RESOURCE_DIR}/include")
+  message(ERROR "Clang Include Directory: ${CLANG_INCLUDE_DIR}")
+
+  include_directories(${CLANG_INCLUDE_DIR})
+
 endif()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
