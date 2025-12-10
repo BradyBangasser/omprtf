@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 
 project(OMPDataPerf C CXX)
 
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
@@ -120,6 +121,7 @@ elseif(HASH_FUNCTION STREQUAL "t1ha0_ia32aes_avx" OR
   set_target_properties(t1ha PROPERTIES C_STANDARD 11)
   set_target_properties(t1ha PROPERTIES C_STANDARD_REQUIRED ON)
   set_target_properties(t1ha PROPERTIES C_EXTENSIONS OFF)
+  set_target_properties(t1ha PROPERTIES POSITION_INDEPENDENT_CODE ON)
   target_link_libraries(libompdataperf PRIVATE t1ha)
 elseif(HASH_FUNCTION STREQUAL "XXH32" OR
        HASH_FUNCTION STREQUAL "XXH64" OR
