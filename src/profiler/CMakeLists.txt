@@ -2,6 +2,20 @@ cmake_minimum_required(VERSION 3.12)
 
 project(OMPDataPerf C CXX)
 
+find_program(LLVM_CONFIG llvm-config)
+
+if (LLVM_CONFIG)
+  execute_process(
+    COMMAND ${LLVM_CONFIG} --includedir
+    OUTPUT_VARIABLE LLVM_INCLUDE_DIR
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+
+  message(STATUS "LLVM include dir: ${LLVM_INCLUDE_DIR}")
+  include_directories(LLVM_INCLUDE_DIRS)
+else()
+  message(FATAL_ERROR "llvm-config not found")
+endif()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 if(NOT CMAKE_BUILD_TYPE)
