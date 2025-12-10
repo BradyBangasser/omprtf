@@ -57,7 +57,7 @@ extern "C" int cmeta(const char *file) {
 
   DIFile *File = DIB.createFile(file, ".");
   DICompileUnit *CU =
-      DIB.createCompileUnit(dwarf::DW_LANG_C, File, "cmeta", false, "", 0);
+      DIB.createCompileUnit(dwarf::DW_LANG_C, File, "cmeta", false, "", 1);
 
   for (Function &F : *M) {
     if (F.isDeclaration())
