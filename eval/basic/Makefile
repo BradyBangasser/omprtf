@@ -1,7 +1,7 @@
 all: basic.out main.c.bc main.c.ll
 
 clean:
-	rm -vf *.out *.bc *.o
+	rm -vf *.out *.bc *.o *.ll
 
 basic.out: main.c.o
 	clang -o $@ $^ -lomp -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda

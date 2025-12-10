@@ -25,7 +25,7 @@ extern "C" int cmeta(const char *file) {
   size_t line_s = 0;
   FILE *f = NULL;
 
-  std::unordered_map<std::string_view, size_t> line_map;
+  std::unordered_map<std::string, size_t> line_map;
 
   f = fopen(file, "r");
 
@@ -35,7 +35,7 @@ extern "C" int cmeta(const char *file) {
       curs++;
     if (*curs == '%') {
       n++;
-      line_map[std::string_view(line)] = n;
+      line_map.emplace(std::string(line), n);
     }
   }
 
@@ -53,6 +53,29 @@ extern "C" int cmeta(const char *file) {
     return 2;
   }
 
+  // This removes old metadata
+  for (Function &F : *M) {
+    F.setSubprogram(nullptr);
+
+    for (BasicBlock &BB : F) {
+      for (Instruction &I : BB) {
+        I.setDebugLoc(DebugLoc());
+      }
+    }
+  }
+
+  if (NamedMDNode *N = M->getNamedMetadata("llvm.dbg.cu"))
+    M->eraseNamedMetadata(N);
+  if (NamedMDNode *N2 = M->getNamedMetadata("llvm.dbg.sp"))
+    M->eraseNamedMetadata(N2);
+  if (NamedMDNode *N3 = M->getNamedMetadata("llvm.dbg.gv"))
+    M->eraseNamedMetadata(N3);
+
+  // Add new metadata
+
+  M->addModuleFlag(llvm::Module::Warning, "Debug Info Version",
+                   llvm::DEBUG_METADATA_VERSION);
+
   DIBuilder DIB(*M);
 
   DIFile *File = DIB.createFile(file, ".");
@@ -63,8 +86,13 @@ extern "C" int cmeta(const char *file) {
     if (F.isDeclaration())
       continue;
 
+    SmallVector<Metadata *, 0> EmptyVec;
+    DITypeRefArray TypeArray = DIB.getOrCreateTypeArray(EmptyVec);
+    DISubroutineType *RST = DIB.createSubroutineType(TypeArray);
+
     DISubprogram *SP =
-        DIB.createFunction(File, F.getName(), F.getName(), File, 1, nullptr, 1);
+        DIB.createFunction(File, F.getName(), F.getName(), File, 1, RST, 1,
+                           DINode::FlagZero, DISubprogram::SPFlagDefinition);
 
     F.setSubprogram(SP);
 
