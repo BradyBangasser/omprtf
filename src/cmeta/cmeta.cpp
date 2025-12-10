@@ -4,6 +4,7 @@
 #include <fcntl.h>
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/Instruction.h>
+#include <llvm/Support/raw_ostream.h>
 #include <stdio.h>
 
 #include <llvm/IR/DIBuilder.h>
@@ -75,6 +76,18 @@ extern "C" int cmeta(const char *file) {
       }
     }
   }
+
+  DIB.finalize();
+
+  std::error_code EC;
+  raw_fd_ostream Out(file, EC);
+
+  if (EC) {
+    ERRORF("An error occured writing the file: %s\n", EC.message().data());
+    return 3;
+  }
+
+  M->print(Out, nullptr);
 
   return 0;
 }
