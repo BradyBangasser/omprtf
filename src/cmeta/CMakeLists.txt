@@ -1,6 +1,9 @@
 add_library(cmeta STATIC cmeta.cpp)
 add_executable(cmeta.out main.c)
 
+set(CMAKE_C_COMPILER "clang")
+set(CMAKE_CXX_COMPILER "clang++")
+
 target_include_directories(cmeta
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}

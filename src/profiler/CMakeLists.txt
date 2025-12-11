@@ -4,6 +4,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
+set(CMAKE_C_COMPILER "clang")
+set(CMAKE_CXX_COMPILER "clang++")
+
 set(HASH_FUNCTION t1ha0_ia32aes_avx2)
 
 add_compile_definitions(HASH_FUNCTION_${HASH_FUNCTION})
@@ -12,6 +15,10 @@ add_compile_definitions(HASH_FUNCTION=${HASH_FUNCTION})
 
 add_library(libprofiler SHARED src/tool.cc src/analyze.cc src/symbolizer.cc)
 set_target_properties(libprofiler PROPERTIES OUTPUT_NAME "profiler")
+
+target_include_directories(libprofiler PRIVATE 
+        ${LLVM_INCLUDE_DIRS}
+	)
 
 find_library(LIBDW dw REQUIRED)
 target_link_libraries(libprofiler PRIVATE ${LIBDW})
