@@ -2,6 +2,7 @@
 #include "logging.h"
 
 #include <fcntl.h>
+#include <llvm/ADT/StringRef.h>
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/Instruction.h>
 #include <llvm/Support/raw_ostream.h>
@@ -78,7 +79,13 @@ extern "C" int cmeta(const char *file) {
 
   DIBuilder DIB(*M);
 
-  DIFile *File = DIB.createFile(file, ".");
+  StringRef full = file;
+  size_t slash = full.rfind('/');
+
+  StringRef dirStr = slash == StringRef::npos ? "." : full.substr(0, slash);
+  StringRef fileStr = slash == StringRef::npos ? full : full.substr(slash + 1);
+
+  DIFile *File = DIB.createFile(fileStr, dirStr);
   DICompileUnit *CU =
       DIB.createCompileUnit(dwarf::DW_LANG_C, File, "cmeta", false, "", 1);
 
@@ -91,7 +98,7 @@ extern "C" int cmeta(const char *file) {
     DISubroutineType *RST = DIB.createSubroutineType(TypeArray);
 
     DISubprogram *SP =
-        DIB.createFunction(File, F.getName(), F.getName(), File, 1, RST, 1,
+        DIB.createFunction(CU, F.getName(), F.getName(), File, 1, RST, 1,
                            DINode::FlagZero, DISubprogram::SPFlagDefinition);
 
     F.setSubprogram(SP);

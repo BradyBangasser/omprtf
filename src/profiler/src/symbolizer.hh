@@ -13,7 +13,7 @@ private:
 public:
   /* Setting 'verbose' to true will immediately print error messages to stderr.
    */
-  Symbolizer(bool verbose=false);
+  Symbolizer(bool verbose = true);
   ~Symbolizer();
 
   /* Given an instruction pointer for the running program, will return the
@@ -25,11 +25,13 @@ public:
   void info(const void *ip, const char **symbol, const char **filename,
             int *lineno, int *colno);
 
-  /* Returns true if an error occurred at any point during the Symbolizer's execution, false otherwise.
+  /* Returns true if an error occurred at any point during the Symbolizer's
+   * execution, false otherwise.
    */
-  bool has_errmsg() const {return !m_errmsg.empty(); }
+  bool has_errmsg() const { return !m_errmsg.empty(); }
 
-  /* Return a string containing the most recent error message. If no error has occurred, returns the empty string.
+  /* Return a string containing the most recent error message. If no error has
+   * occurred, returns the empty string.
    */
   std::string get_errmsg() const { return m_errmsg; }
 
@@ -37,7 +39,8 @@ public:
    */
   void clear_errmsg() { m_errmsg.clear(); }
 
-  /* Returns true if the Symbolizer has an active session with dwfl, false otherwise.
+  /* Returns true if the Symbolizer has an active session with dwfl, false
+   * otherwise.
    */
   bool is_valid() const { return m_dwfl != nullptr; };
 

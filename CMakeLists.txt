@@ -42,5 +42,6 @@ add_subdirectory(src/logging)
 add_subdirectory(src/cmeta)
 add_subdirectory(src/opt_pass)
 add_subdirectory(src/profiler)
+add_subdirectory(src/mreader)
 add_subdirectory(eval)
 
