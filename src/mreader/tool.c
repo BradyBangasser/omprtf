@@ -1,11 +1,7 @@
-#include "getfileinfo.h"
+#include "getlineinfo.h"
 #include "logging.h"
+
 #include <assert.h>
+#include <dlfcn.h>
 
-int main(int argc, char *argv[]) {
-  assert(argc == 2);
-
-  getfileinfo(argv[1]);
-
-  return 0;
-}
+int main(int argc, char *argv[]) { return 0; }

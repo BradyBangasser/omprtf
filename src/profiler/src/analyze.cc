@@ -1,9 +1,12 @@
 #include "analyze.hh"
 
+#include "logging.h"
+
 #include <cassert>
 #include <cmath>
 #include <cstdint>
 #include <deque>
+#include <dlfcn.h>
 #include <iomanip>
 #include <iostream>
 #include <map>
@@ -112,6 +115,17 @@ std::string format_optype(ompt_target_data_op_t optype, int width) {
 }
 
 std::string format_symbol(Symbolizer &symbolizer, const void *codeptr_ra) {
+  DEBUGF("Code pointer: %p\n", codeptr_ra);
+
+  Dl_info info;
+
+  if (dladdr(codeptr_ra, &info) == 0) {
+    ERROR("Failed to lookup runtime address\n");
+    return "  <lookup error>";
+  }
+
+  DEBUGF("Relative Address: %#lX\n",
+         (uint64_t)codeptr_ra - (uint64_t)info.dli_fbase);
   if (codeptr_ra == nullptr) {
     assert(false);
     return "  ";

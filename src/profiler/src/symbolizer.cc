@@ -1,5 +1,7 @@
 #include "symbolizer.hh"
 
+#include "logging.h"
+
 #include <cstring>
 #include <cxxabi.h>
 #include <iostream>
