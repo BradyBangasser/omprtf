@@ -44,7 +44,7 @@ if(CUDAToolkit_FOUND AND OpenMP_FOUND)
         VERBATIM
     )
 
-  add_custom_target(generate_ir_artifacts ALL
+  add_custom_target(${SUBDIR_NAME}_generate_ir_artifacts ALL
         DEPENDS ${OUTPUT_BASE_NAME}.bc ${OUTPUT_BASE_NAME}.ll
     )
 
