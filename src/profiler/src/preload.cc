@@ -69,7 +69,7 @@ void setenv_omp_tool() {
  */
 void setenv_omp_tool_libraries(const char *exec_path) {
   namespace fs = std::filesystem;
-  const char *lib_name = "libompdataperf.so";
+  const char *lib_name = "libprofiler.so";
   fs::path lib_path;
   try {
     fs::path exec_full_path = fs::canonical(exec_path);
