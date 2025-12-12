@@ -125,7 +125,7 @@ std::string format_symbol(Symbolizer &symbolizer, const void *codeptr_ra) {
   }
 
   DEBUGF("Relative Address: %#lX\n",
-         (uint64_t)codeptr_ra - (uint64_t)info.dli_fbase);
+         (uint64_t)codeptr_ra - (uint64_t)info.dli_fbase - 0x8ul);
   if (codeptr_ra == nullptr) {
     assert(false);
     return "  ";
