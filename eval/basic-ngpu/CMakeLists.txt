@@ -14,6 +14,8 @@ set_target_properties(${SUBDIR_NAME}.out PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
     )
 
+target_compile_options(${SUBDIR_NAME}.out PRIVATE -g)
+target_link_options(${SUBDIR_NAME}.out PRIVATE -g)
 target_link_libraries(${SUBDIR_NAME}.out PRIVATE OpenMP::OpenMP_C)
 
 add_custom_command(

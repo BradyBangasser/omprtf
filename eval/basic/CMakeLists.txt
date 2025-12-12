@@ -23,8 +23,8 @@ if(CUDAToolkit_FOUND AND OpenMP_FOUND)
     )
 
   target_link_libraries(${SUBDIR_NAME}.out PRIVATE OpenMP::OpenMP_C)
-  target_compile_options(${SUBDIR_NAME}.out PRIVATE ${OFFLOAD_FLAGS})
-  target_link_options(${SUBDIR_NAME}.out PRIVATE ${OFFLOAD_FLAGS})
+  target_compile_options(${SUBDIR_NAME}.out PRIVATE ${OFFLOAD_FLAGS} -g)
+  target_link_options(${SUBDIR_NAME}.out PRIVATE ${OFFLOAD_FLAGS} -g)
 
   add_custom_command(
         OUTPUT ${OUTPUT_BASE_NAME}.bc
