@@ -16,6 +16,7 @@ target_link_libraries(cmeta.out
     PRIVATE
         logging
         cmeta
+    PUBLIC
         LLVMSupport
         LLVMIRReader
         LLVMCore
