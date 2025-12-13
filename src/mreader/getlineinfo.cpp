@@ -29,6 +29,6 @@ extern "C" void *getlineinfo(const char *file, uint64_t addr) {
 
   LI->dump(outs());
 
-  SUCCESSF("Success (line %d)\n", LI->Line);
+  SUCCESSF("Success (func: %s line %d)\n", LI->FunctionName.data(), LI->Line);
   return NULL;
 }
