@@ -46,9 +46,9 @@ int main(int argc, const char *argv[]) {
   }
 
   std::vector<char *> pargs;
-  char *program = (char *)argv[1];
+  char *program = (char *)"/tmp/out.out";
   pargs.push_back(program);
-  for (int i = 1; i < argc; ++i) {
+  for (int i = 2; i < argc; ++i) {
     pargs.push_back((char *)argv[i]);
   }
   pargs.push_back(nullptr);
