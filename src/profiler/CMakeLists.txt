@@ -16,17 +16,22 @@ add_compile_definitions(HASH_FUNCTION=${HASH_FUNCTION})
 add_library(libprofiler SHARED src/tool.cc src/analyze.cc src/symbolizer.cc)
 set_target_properties(libprofiler PROPERTIES OUTPUT_NAME "profiler")
 
-target_include_directories(libprofiler PRIVATE
+target_include_directories(libprofiler
+    PRIVATE
         ${LLVM_INCLUDE_DIRS}
+    PUBLIC
+        hashes/t1ha ${CMAKE_SOURCE_DIR}/src/logging
  )
 
 find_library(LIBDW dw REQUIRED)
 target_link_libraries(libprofiler PRIVATE ${LIBDW} logging)
 
-add_executable(profile src/preload.cc)
-target_include_directories(libprofiler PUBLIC hashes/t1ha)
-target_include_directories(libprofiler PUBLIC hashes/t1ha ${CMAKE_SOURCE_DIR}/src/logging)
-target_include_directories(profile PUBLIC hashes/t1ha)
+add_library(protool STATIC src/preload.cc)
+target_include_directories(protool PUBLIC hashes/t1ha)
+
+add_executable(profile src/main.cc)
+target_link_libraries(profile PRIVATE protool)
+
 
 add_library(t1ha STATIC hashes/t1ha/src/t1ha0.c
                         hashes/t1ha/src/t1ha1.c
