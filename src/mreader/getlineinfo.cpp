@@ -29,12 +29,6 @@ extern "C" void *getlineinfo(const char *file, uint64_t addr) {
 
   LI->dump(outs());
 
-  if (!LI->Source) {
-    ERRORF("Failed to fetch address %#lX, error: %s\n", addr,
-           toString(LI.takeError()).data());
-    return NULL;
-  }
-
-  SUCCESSF("Success (line %s)\n", LI->Source.value().data());
+  SUCCESSF("Success (line %d)\n", LI->Line);
   return NULL;
 }
