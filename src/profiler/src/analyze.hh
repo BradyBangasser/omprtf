@@ -1,12 +1,12 @@
 #pragma once
 
 #include <chrono>
+#include <map>
 #include <set>
 #include <vector>
 
 #ifdef ENABLE_COLLISION_CHECKING
 #include <cassert>
-#include <map>
 #include <string.h>
 #endif // ENABLE_COLLISION_CHECKING
 
@@ -14,6 +14,21 @@
 
 #include "hash.hh"
 #include "symbolizer.hh"
+
+typedef enum analyzer_result_type {
+  DUPL_TRANSFER,
+  UNUSED_TRANSER,
+} analyzer_result_type_e;
+
+typedef struct analyzer_result {
+  // Relative address
+  std::vector<uint64_t> code;
+  analyzer_result_type_e result_type;
+} analyzer_result_t;
+
+typedef std::vector<std::unique_ptr<analyzer_result_t>> analyzer_results_t;
+
+void set_analyzer_vector(std::shared_ptr<analyzer_results_t> results);
 
 /* Data structure used to store details about each target event.
  */
@@ -28,7 +43,8 @@ typedef struct target_info {
   std::chrono::steady_clock::time_point end_time;
 } target_info_t;
 
-/* Data structure used to store details about each data transfer event.
+/*
+ * Data structure used to store details about each data transfer event.
  */
 typedef struct data_op_info {
   ompt_target_data_op_t optype;

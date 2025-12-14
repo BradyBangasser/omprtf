@@ -7,12 +7,16 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "analyze.hh"
 #include "cmeta.h"
+#include "getlineinfo.h"
 #include "logging.h"
 #include "preload.hh"
 
 int main(int argc, const char *argv[]) {
   assert(argc == 2);
+  std::shared_ptr<analyzer_results_t> profile_results =
+      std::make_shared<analyzer_results_t>();
 
   // Augment metadata
   cmeta(argv[1]);
@@ -57,6 +61,15 @@ int main(int argc, const char *argv[]) {
   setenv_omp_tool_libraries(argv[0]);
   setenv_omp_tool_verbose_init(0);
 
+  set_analyzer_vector(profile_results);
+
   execvp(program, pargs.data());
+
+  for (const auto &res : *profile_results) {
+    for (uint64_t addr : res->code) {
+      getlineinfo(argv[1], addr);
+    }
+  }
+
   return 0;
 }

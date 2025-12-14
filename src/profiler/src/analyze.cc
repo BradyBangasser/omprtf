@@ -24,6 +24,33 @@ constexpr int f_w_bytes = 13;     // column width for bytes
 constexpr int f_w_device_id = 13; // column width for device ids
 constexpr int f_w_optype = 21;    // column width for optype
 
+std::shared_ptr<analyzer_results_t> results_ptr = NULL;
+
+void set_analyzer_vector(std::shared_ptr<analyzer_results_t> results) {
+  assert(results_ptr == NULL);
+  results_ptr = results;
+}
+
+static inline void add_analysis_result(analyzer_result_type type,
+                                       std::vector<uint64_t> addrs) {
+  if (results_ptr == NULL)
+    return;
+  static Dl_info info = {};
+
+  std::unique_ptr<analyzer_result> result =
+      std::make_unique<analyzer_result>(std::vector<uint64_t>(), type);
+
+  for (const uint64_t addr : addrs) {
+    if (dladdr((void *)addr, &info) == 0) {
+      return;
+    }
+
+    result->code.push_back(addr - (uint64_t)info.dli_fbase);
+  }
+
+  results_ptr->push_back(std::move(result));
+}
+
 float round_to(float value, float precision = 1.0) {
   return std::roundf(value / precision) * precision;
 }
@@ -770,6 +797,7 @@ void analyze_duplicate_transfers(
 
   for (auto &entry : received) {
     std::vector<const data_op_info_t *> &duplicate_transfers = entry.second;
+    std::vector<uint64_t> op_ptrs;
     if (duplicate_transfers.size() < 2) {
       // not a duplicate transfer if it was unique hash
       continue;
@@ -777,8 +805,10 @@ void analyze_duplicate_transfers(
     duration<uint64_t, std::nano> duration(0);
     for (const data_op_info_t *transfer_ptr : duplicate_transfers) {
       duration += transfer_ptr->end_time - transfer_ptr->start_time;
+      op_ptrs.push_back((uint64_t)transfer_ptr->codeptr_ra);
     }
     duplicate_transfer_durations.emplace(duration, duplicate_transfers);
+    add_analysis_result(DUPL_TRANSFER, op_ptrs);
   }
 
   print_duplicate_transfers(symbolizer, duplicate_transfer_durations, exec_time,
@@ -847,6 +877,8 @@ void analyze_round_trip_transfers(
     duration<uint64_t, std::nano> tx_duration(0);
     duration<uint64_t, std::nano> rx_duration(0);
     for (const auto [rx_ptr, tx_ptr] : entry.second) {
+      DEBUGF("%#lX %#lX\n", (uint64_t)rx_ptr->codeptr_ra,
+             (uint64_t)rx_ptr->codeptr_ra);
       tx_duration += tx_ptr->end_time - tx_ptr->start_time;
       rx_duration += rx_ptr->end_time - rx_ptr->start_time;
     }
@@ -950,6 +982,8 @@ void analyze_repeated_allocs(
     for (const auto [alloc_ptr, delete_ptr] : entry.second) {
       alloc_duration += alloc_ptr->end_time - alloc_ptr->start_time;
       delete_duration += delete_ptr->end_time - delete_ptr->start_time;
+      DEBUGF("%#lX %#lX\n", (uint64_t)alloc_ptr->codeptr_ra,
+             (uint64_t)delete_ptr->codeptr_ra);
     }
     const duration<uint64_t, std::nano> total_duration =
         alloc_duration + delete_duration;
@@ -1053,6 +1087,8 @@ void analyze_unused_allocs(
     for (const auto [alloc_ptr, delete_ptr] : entry.second) {
       alloc_duration += alloc_ptr->end_time - alloc_ptr->start_time;
       delete_duration += delete_ptr->end_time - delete_ptr->start_time;
+      DEBUGF("%#lX %#lX\n", (uint64_t)alloc_ptr->codeptr_ra,
+             (uint64_t)delete_ptr->codeptr_ra);
     }
     const duration<uint64_t, std::nano> total_duration =
         alloc_duration + delete_duration;
@@ -1117,10 +1153,14 @@ void analyze_unused_transfers(
   }
 
   for (const auto &entry : unused_transfers) {
+    std::vector<uint64_t> addrs;
     duration<uint64_t, std::nano> duration(0);
     for (const data_op_info_t *transfer_ptr : entry.second) {
       duration += transfer_ptr->end_time - transfer_ptr->start_time;
+      addrs.push_back((uint64_t)transfer_ptr->codeptr_ra);
     }
+
+    add_analysis_result(UNUSED_TRANSER, addrs);
     unused_transfer_durations.emplace(duration, entry.second);
   }
 
