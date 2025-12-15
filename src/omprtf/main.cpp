@@ -64,6 +64,8 @@ int main(int argc, const char *argv[]) {
 
   set_analyzer_vector(profile_results);
 
+  pid = fork();
+
   if (pid == 0) {
     DEBUGF("%s\n", clang_p->data());
     execvp(program, pargs.data());
