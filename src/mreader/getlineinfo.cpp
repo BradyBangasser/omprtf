@@ -11,7 +11,7 @@
 using namespace llvm;
 using namespace llvm::object;
 
-extern "C" void *getlineinfo(const char *file, uint64_t addr) {
+std::unique_ptr<llvm::DILineInfo> getlineinfo(const char *file, uint64_t addr) {
   llvm::symbolize::LLVMSymbolizer::Options opts;
   opts.Demangle = true;
   opts.RelativeAddresses = true;
@@ -27,8 +27,5 @@ extern "C" void *getlineinfo(const char *file, uint64_t addr) {
     return NULL;
   }
 
-  LI->dump(outs());
-
-  SUCCESSF("Success (func: %s line %d)\n", LI->FunctionName.data(), LI->Line);
-  return NULL;
+  return std::make_unique<llvm::DILineInfo>(LI.get());
 }

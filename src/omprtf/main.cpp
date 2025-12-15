@@ -12,7 +12,7 @@
 
 #include "analyze.hh"
 #include "cmeta.h"
-#include "getlineinfo.h"
+#include "getlineinfo.hpp"
 #include "logging.h"
 #include "preload.hh"
 
@@ -96,7 +96,8 @@ int main(int argc, const char *argv[]) {
     read(pipefd[0], &type, sizeof(type));
     read(pipefd[0], &n_addrs, sizeof(n_addrs));
 
-    auto res = std::make_unique<analyzer_result_t>();
+    std::unique_ptr<analyzer_result_t> res =
+        std::make_unique<analyzer_result_t>();
     res->result_type = static_cast<analyzer_result_type_e>(type);
 
     res->code.resize(n_addrs);
@@ -108,8 +109,9 @@ int main(int argc, const char *argv[]) {
   waitpid(pid, nullptr, 0);
 
   for (const auto &res : *profile_results) {
+    std::vector<std::unique_ptr<llvm::DILineInfo>> lines;
     for (uint64_t addr : res->code) {
-      getlineinfo(argv[1], addr);
+      lines.push_back(getlineinfo(program, addr));
     }
   }
 
