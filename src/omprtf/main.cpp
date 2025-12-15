@@ -7,6 +7,9 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include <fcntl.h>
+#include <vector>
+
 #include "analyze.hh"
 #include "cmeta.h"
 #include "getlineinfo.h"
@@ -14,22 +17,22 @@
 #include "preload.hh"
 
 int main(int argc, const char *argv[]) {
-  assert(argc == 2);
+  assert(argc >= 2);
+
   std::shared_ptr<analyzer_results_t> profile_results =
       std::make_shared<analyzer_results_t>();
+
   pid_t pid;
 
-  // Augment metadata
   cmeta(argv[1]);
 
   llvm::ErrorOr<std::string> clang_p = llvm::sys::findProgramByName("clang");
-
   if (!clang_p) {
     ERROR("Failed to locate Clang\n");
     return 1;
   }
 
-  char const *c_arg_arr[] = {clang_p->data(),
+  char const *c_arg_arr[] = {clang_p->c_str(),
                              "-g",
                              "-lomp",
                              "-fopenmp",
@@ -37,45 +40,73 @@ int main(int argc, const char *argv[]) {
                              "-o",
                              "/tmp/out.out",
                              argv[1],
-                             NULL};
+                             nullptr};
 
   pid = fork();
-
   if (pid == 0) {
-    DEBUGF("%s\n", clang_p->data());
-    execv(clang_p->data(), (char **)c_arg_arr) || (SUCCESS("Worked\n"));
-    ERROR("ERROR\n");
-    exit(127);
-  } else {
-    waitpid(pid, 0, 0);
+    execv(clang_p->c_str(), (char **)c_arg_arr);
+    perror("execv clang");
+    _exit(127);
   }
+  waitpid(pid, nullptr, 0);
+
+  int pipefd[2];
+  assert(pipe(pipefd) == 0);
+
+  // Pass write FD to child via env
+  char fd_buf[16];
+  snprintf(fd_buf, sizeof(fd_buf), "%d", pipefd[1]);
+  setenv("ANALYZER_PIPE_FD", fd_buf, 1);
 
   std::vector<char *> pargs;
   char *program = (char *)"/tmp/out.out";
   pargs.push_back(program);
-  for (int i = 2; i < argc; ++i) {
+  for (int i = 2; i < argc; ++i)
     pargs.push_back((char *)argv[i]);
-  }
   pargs.push_back(nullptr);
 
   pid = fork();
 
   if (pid == 0) {
-    DEBUGF("profile_results: %p\n", profile_results.get());
-    set_analyzer_vector(profile_results);
+    close(pipefd[0]); // child doesn't read
+
+    set_analyzer_vector(profile_results); // tool-local
     setenv_omp_tool();
     setenv_omp_tool_libraries(argv[0]);
     setenv_omp_tool_verbose_init(0);
 
-    DEBUGF("%s\n", clang_p->data());
     execvp(program, pargs.data());
-    ERROR("ERROR\n");
-    exit(127);
-  } else {
-    waitpid(pid, 0, 0);
+    perror("execvp target");
+    _exit(127);
   }
 
-  SUCCESS("HERE\n");
+  close(pipefd[1]); // parent doesn't write
+
+  while (true) {
+    uint32_t magic;
+    ssize_t r = read(pipefd[0], &magic, sizeof(magic));
+
+    if (r == 0)
+      break; // EOF
+    if (r != sizeof(magic) || magic != 0xA11A11A1)
+      break;
+
+    uint32_t type;
+    uint64_t n_addrs;
+
+    read(pipefd[0], &type, sizeof(type));
+    read(pipefd[0], &n_addrs, sizeof(n_addrs));
+
+    auto res = std::make_unique<analyzer_result_t>();
+    res->result_type = static_cast<analyzer_result_type_e>(type);
+
+    res->code.resize(n_addrs);
+    read(pipefd[0], res->code.data(), n_addrs * sizeof(uint64_t));
+
+    profile_results->push_back(std::move(res));
+  }
+
+  waitpid(pid, nullptr, 0);
 
   for (const auto &res : *profile_results) {
     for (uint64_t addr : res->code) {
@@ -83,5 +114,6 @@ int main(int argc, const char *argv[]) {
     }
   }
 
+  SUCCESS("DONE\n");
   return 0;
 }

@@ -12,6 +12,8 @@
 #include <map>
 #include <sstream>
 
+#include <unistd.h>
+
 using namespace std::chrono;
 
 // OUTPUT FORMATTING CONSTANTS
@@ -33,6 +35,31 @@ void set_analyzer_vector(std::shared_ptr<analyzer_results_t> results) {
   INFOF("results_ptr %p\n", results_ptr.get());
 }
 
+static int get_pipe_fd() {
+  const char *fd = getenv("ANALYZER_PIPE_FD");
+  return fd ? atoi(fd) : -1;
+}
+
+void dump_results_ipc(const analyzer_results_t &results) {
+  int fd = get_pipe_fd();
+  if (fd < 0)
+    return;
+
+  uint64_t n_results = results.size();
+  write(fd, &n_results, sizeof(n_results));
+
+  for (const auto &res : results) {
+    uint32_t type = static_cast<uint32_t>(res->result_type);
+    uint64_t n_addrs = res->code.size();
+
+    write(fd, &type, sizeof(type));
+    write(fd, &n_addrs, sizeof(n_addrs));
+    write(fd, res->code.data(), n_addrs * sizeof(uint64_t));
+  }
+
+  close(fd);
+}
+
 static inline void add_analysis_result(analyzer_result_type type,
                                        std::vector<uint64_t> addrs) {
   DEBUG("add_analysis_result\n");
@@ -51,6 +78,20 @@ static inline void add_analysis_result(analyzer_result_type type,
 
     result->code.push_back(addr - (uint64_t)info.dli_fbase);
   }
+
+  int fd = get_pipe_fd();
+  if (fd < 0)
+    return;
+
+  constexpr uint32_t MAGIC = 0xA11A11A1;
+
+  uint32_t ptype = static_cast<uint32_t>(result->result_type);
+  uint64_t n_addrs = result->code.size();
+
+  write(fd, &MAGIC, sizeof(MAGIC));
+  write(fd, &ptype, sizeof(ptype));
+  write(fd, &n_addrs, sizeof(n_addrs));
+  write(fd, result->code.data(), n_addrs * sizeof(uint64_t));
 
   results_ptr->push_back(std::move(result));
 }
