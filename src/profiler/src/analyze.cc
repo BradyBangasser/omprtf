@@ -28,11 +28,14 @@ std::shared_ptr<analyzer_results_t> results_ptr = NULL;
 
 void set_analyzer_vector(std::shared_ptr<analyzer_results_t> results) {
   assert(results_ptr == NULL);
+  INFOF("Set results_ptr to %p\n", results.get());
   results_ptr = results;
 }
 
 static inline void add_analysis_result(analyzer_result_type type,
                                        std::vector<uint64_t> addrs) {
+  DEBUG("add_analysis_result\n");
+  INFOF("Set results_ptr to %p\n", results_ptr.get());
   if (results_ptr == NULL)
     return;
   static Dl_info info = {};
@@ -1345,7 +1348,7 @@ void analyze_codeptr_durations(
     codeptr_durations.emplace(duration, info_list);
   }
 
-  print_codeptr_durations(symbolizer, codeptr_durations, exec_time);
+  // print_codeptr_durations(symbolizer, codeptr_durations, exec_time);
   return;
 }
 
