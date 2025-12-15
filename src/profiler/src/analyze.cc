@@ -811,8 +811,10 @@ void analyze_duplicate_transfers(
     add_analysis_result(DUPL_TRANSFER, op_ptrs);
   }
 
+  /*
   print_duplicate_transfers(symbolizer, duplicate_transfer_durations, exec_time,
                             num_devices);
+  */
   return;
 }
 
@@ -887,8 +889,10 @@ void analyze_round_trip_transfers(
     round_trip_durations.emplace(trip_duration, entry.second);
   }
 
+  /*
   print_round_trip_transfers(symbolizer, round_trip_durations, exec_time,
                              num_devices);
+                             */
   return;
 }
 
@@ -989,8 +993,10 @@ void analyze_repeated_allocs(
         alloc_duration + delete_duration;
     repeated_alloc_durations.emplace(total_duration, entry.second);
   }
+  /*
   print_repeated_allocs(symbolizer, repeated_alloc_durations, exec_time,
                         num_devices);
+                        */
   return;
 }
 
@@ -1094,8 +1100,10 @@ void analyze_unused_allocs(
         alloc_duration + delete_duration;
     unused_alloc_durations.emplace(total_duration, entry.second);
   }
+  /*
   print_unused_allocs(symbolizer, unused_alloc_durations, exec_time,
                       num_devices);
+  */
   return;
 }
 
@@ -1164,8 +1172,10 @@ void analyze_unused_transfers(
     unused_transfer_durations.emplace(duration, entry.second);
   }
 
+  /*
   print_unused_transfers(symbolizer, unused_transfer_durations, exec_time,
                          num_devices);
+  */
   return;
 }
 
@@ -1226,12 +1236,14 @@ void analyze_inefficient_transfers(
                            device_target_log, device_transfer_log, exec_time,
                            num_devices);
 
+  /*
   print_potential_resource_savings(
       duplicate_transfer_durations, round_trip_durations,
       repeated_alloc_durations, unused_alloc_durations,
       unused_transfer_durations, exec_time, num_devices);
 
   print_peak_device_memory_allocation(peak_allocated_bytes);
+  */
   return;
 }
 
