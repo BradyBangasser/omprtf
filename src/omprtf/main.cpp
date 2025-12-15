@@ -17,6 +17,7 @@ int main(int argc, const char *argv[]) {
   assert(argc == 2);
   std::shared_ptr<analyzer_results_t> profile_results =
       std::make_shared<analyzer_results_t>();
+  pid_t pid;
 
   // Augment metadata
   cmeta(argv[1]);
@@ -38,7 +39,7 @@ int main(int argc, const char *argv[]) {
                              argv[1],
                              NULL};
 
-  pid_t pid = fork();
+  pid = fork();
 
   if (pid == 0) {
     DEBUGF("%s\n", clang_p->data());
@@ -63,7 +64,14 @@ int main(int argc, const char *argv[]) {
 
   set_analyzer_vector(profile_results);
 
-  execvp(program, pargs.data());
+  if (pid == 0) {
+    DEBUGF("%s\n", clang_p->data());
+    execvp(program, pargs.data());
+    ERROR("ERROR\n");
+    exit(127);
+  } else {
+    waitpid(pid, 0, 0);
+  }
 
   for (const auto &res : *profile_results) {
     for (uint64_t addr : res->code) {
