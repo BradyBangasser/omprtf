@@ -70,7 +70,6 @@ int main(int argc, const char *argv[]) {
   if (pid == 0) {
     close(pipefd[0]); // child doesn't read
 
-    set_analyzer_vector(profile_results); // tool-local
     setenv_omp_tool();
     setenv_omp_tool_libraries(argv[0]);
     setenv_omp_tool_verbose_init(0);

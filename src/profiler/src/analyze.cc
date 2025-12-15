@@ -26,15 +26,6 @@ constexpr int f_w_bytes = 13;     // column width for bytes
 constexpr int f_w_device_id = 13; // column width for device ids
 constexpr int f_w_optype = 21;    // column width for optype
 
-std::shared_ptr<analyzer_results_t> results_ptr = NULL;
-
-void set_analyzer_vector(std::shared_ptr<analyzer_results_t> results) {
-  assert(results_ptr == NULL);
-  INFOF("Set results_ptr to %p\n", results.get());
-  results_ptr = results;
-  INFOF("results_ptr %p\n", results_ptr.get());
-}
-
 static int get_pipe_fd() {
   const char *fd = getenv("ANALYZER_PIPE_FD");
   return fd ? atoi(fd) : -1;
@@ -63,9 +54,6 @@ void dump_results_ipc(const analyzer_results_t &results) {
 static inline void add_analysis_result(analyzer_result_type type,
                                        std::vector<uint64_t> addrs) {
   DEBUG("add_analysis_result\n");
-  INFOF("results_ptr %p\n", results_ptr.get());
-  if (results_ptr == NULL)
-    return;
   static Dl_info info = {};
 
   std::unique_ptr<analyzer_result> result =
@@ -92,8 +80,6 @@ static inline void add_analysis_result(analyzer_result_type type,
   write(fd, &ptype, sizeof(ptype));
   write(fd, &n_addrs, sizeof(n_addrs));
   write(fd, result->code.data(), n_addrs * sizeof(uint64_t));
-
-  results_ptr->push_back(std::move(result));
 }
 
 float round_to(float value, float precision = 1.0) {

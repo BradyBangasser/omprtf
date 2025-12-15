@@ -28,8 +28,6 @@ typedef struct analyzer_result {
 
 typedef std::vector<std::unique_ptr<analyzer_result_t>> analyzer_results_t;
 
-void set_analyzer_vector(std::shared_ptr<analyzer_results_t> results);
-
 /* Data structure used to store details about each target event.
  */
 typedef struct target_info {
