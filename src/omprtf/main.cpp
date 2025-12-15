@@ -61,11 +61,12 @@ int main(int argc, const char *argv[]) {
   pid = fork();
 
   if (pid == 0) {
+    DEBUGF("profile_results: %p\n", profile_results.get());
+    set_analyzer_vector(profile_results);
     setenv_omp_tool();
     setenv_omp_tool_libraries(argv[0]);
     setenv_omp_tool_verbose_init(0);
 
-    set_analyzer_vector(profile_results);
     DEBUGF("%s\n", clang_p->data());
     execvp(program, pargs.data());
     ERROR("ERROR\n");
