@@ -58,15 +58,14 @@ int main(int argc, const char *argv[]) {
   }
   pargs.push_back(nullptr);
 
-  setenv_omp_tool();
-  setenv_omp_tool_libraries(argv[0]);
-  setenv_omp_tool_verbose_init(0);
-
-  set_analyzer_vector(profile_results);
-
   pid = fork();
 
   if (pid == 0) {
+    setenv_omp_tool();
+    setenv_omp_tool_libraries(argv[0]);
+    setenv_omp_tool_verbose_init(0);
+
+    set_analyzer_vector(profile_results);
     DEBUGF("%s\n", clang_p->data());
     execvp(program, pargs.data());
     ERROR("ERROR\n");

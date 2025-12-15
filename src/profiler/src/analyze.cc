@@ -1351,6 +1351,7 @@ void analyze_codeptr_durations(
 
 void print_summary(const std::vector<data_op_info_t> *data_op_log_ptr,
                    duration<uint64_t, std::nano> exec_time) {
+  return;
   std::map<ompt_target_data_op_t, duration<uint64_t, std::nano>> op_time_map;
   std::map<ompt_target_data_op_t, uint64_t> op_bytes_map;
   std::map<ompt_target_data_op_t, uint64_t> op_calls_map;
