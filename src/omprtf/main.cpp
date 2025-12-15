@@ -75,6 +75,8 @@ int main(int argc, const char *argv[]) {
     waitpid(pid, 0, 0);
   }
 
+  SUCCESS("HERE\n");
+
   for (const auto &res : *profile_results) {
     for (uint64_t addr : res->code) {
       getlineinfo(argv[1], addr);
