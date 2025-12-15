@@ -30,12 +30,13 @@ void set_analyzer_vector(std::shared_ptr<analyzer_results_t> results) {
   assert(results_ptr == NULL);
   INFOF("Set results_ptr to %p\n", results.get());
   results_ptr = results;
+  INFOF("results_ptr %p\n", results_ptr.get());
 }
 
 static inline void add_analysis_result(analyzer_result_type type,
                                        std::vector<uint64_t> addrs) {
   DEBUG("add_analysis_result\n");
-  INFOF("Set results_ptr to %p\n", results_ptr.get());
+  INFOF("results_ptr %p\n", results_ptr.get());
   if (results_ptr == NULL)
     return;
   static Dl_info info = {};
