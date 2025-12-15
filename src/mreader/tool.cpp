@@ -1,4 +1,4 @@
-#include "getlineinfo.h"
+#include "getlineinfo.hpp"
 #include "logging.h"
 
 #include <assert.h>
