@@ -1,4 +1,5 @@
 #include "pass.hpp"
+#include "logging.h"
 
 using namespace llvm;
 
@@ -106,4 +107,13 @@ void replaceLinesWithFiveFunctions(
   for (Instruction *I : toRemove) {
     I->eraseFromParent();
   }
+  std::error_code EC;
+  raw_fd_ostream Out(file, EC);
+
+  if (EC) {
+    ERRORF("An error occured writing the file: %s\n", EC.message().data());
+    return 3;
+  }
+
+  M->print(Out, nullptr);
 }
