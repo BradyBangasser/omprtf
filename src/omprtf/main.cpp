@@ -14,6 +14,7 @@
 #include "cmeta.h"
 #include "getlineinfo.hpp"
 #include "logging.h"
+#include "pass.hpp"
 #include "preload.hh"
 
 int main(int argc, const char *argv[]) {
@@ -113,6 +114,8 @@ int main(int argc, const char *argv[]) {
     for (uint64_t addr : res->code) {
       lines.push_back(getlineinfo(program, addr));
     }
+
+    replaceLinesWithFiveFunctions(argv[1], lines);
   }
 
   SUCCESS("DONE\n");

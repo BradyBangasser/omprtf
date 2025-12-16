@@ -1,43 +1,109 @@
-#include "llvm/Passes/PassBuilder.h"
-#include "llvm/Passes/PassPlugin.h"
-#include <llvm/IR/Analysis.h>
-#include <llvm/IR/IRBuilder.h>
-#include <llvm/IR/Module.h>
-#include <llvm/IR/PassManager.h>
+#include "pass.hpp"
 
 using namespace llvm;
 
-class CheckPass : public PassInfoMixin<CheckPass> {
-public:
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM) {
-    errs() << "Running pass on " << F.getName() << "\n";
+const std::vector<std::string> FuncNames = {"__omprtf_alloc", "__omprtf_h2d",
+                                            "__omprtf_kernel", "__omprtf_d2h",
+                                            "__omprtf_free"};
 
-    for (BasicBlock &BB : F) {
-      errs() << BB.getName() << " block\n";
+void defineOmprtfReplacementFunctions(std::unique_ptr<Module> &M) {
+  LLVMContext &Ctx = M->getContext();
+  Type *VoidTy = Type::getVoidTy(Ctx);
+  Type *Int32Ty = Type::getInt32Ty(Ctx);
+  Type *PtrTy = PointerType::getUnqual(Ctx);
 
-      for (Instruction &I : BB) {
-        errs() << I.getOpcodeName() << "\n";
-      }
-    }
+  FunctionType *PrintfTy = FunctionType::get(Int32Ty, {PtrTy}, true);
+  FunctionCallee PrintfFunc = M->getOrInsertFunction("printf", PrintfTy);
 
-    return PreservedAnalyses::none();
+  for (const std::string &Name : FuncNames) {
+    FunctionType *FTy = FunctionType::get(VoidTy, false);
+    Function *F = Function::Create(FTy, Function::ExternalLinkage, Name, *M);
+
+    BasicBlock *BB = BasicBlock::Create(Ctx, "entry", F);
+    IRBuilder<> Builder(BB);
+
+    std::string Msg = Name;
+    Constant *MsgConst = ConstantDataArray::getString(Ctx, Msg);
+    GlobalVariable *MsgVar = new GlobalVariable(*M, MsgConst->getType(), true,
+                                                GlobalValue::PrivateLinkage,
+                                                MsgConst, ".str." + Name);
+
+    Value *MsgPtr =
+        Builder.CreateInBoundsGEP(MsgConst->getType(), MsgVar,
+                                  {Builder.getInt64(0), Builder.getInt64(0)});
+    Builder.CreateCall(PrintfFunc, {MsgPtr});
+
+    // Return
+    Builder.CreateRetVoid();
+  }
+}
+
+void replaceLinesWithFiveFunctions(
+    const char *file,
+    const std::vector<std::unique_ptr<llvm::DILineInfo>> &LineInfos) {
+  std::map<std::string, std::set<uint32_t>> TargetLines;
+  for (const auto &Info : LineInfos) {
+    if (Info)
+      TargetLines[Info->FileName].insert(Info->Line);
   }
 
-  static bool isRequired() { return true; }
-};
+  LLVMContext Ctx;
+  SMDiagnostic Err;
 
-extern "C" ::llvm::PassPluginLibraryInfo llvmGetPassPluginInfo() {
-  errs() << "Plugin loaded\n";
-  return {LLVM_PLUGIN_API_VERSION, "CheckPass", "1.0", [](PassBuilder &PB) {
-            // Register pipeline callback
-            PB.registerPipelineParsingCallback(
-                [](StringRef Name, FunctionPassManager &FPM,
-                   ArrayRef<PassBuilder::PipelineElement>) {
-                  if (Name == "CheckPass") {
-                    FPM.addPass(CheckPass());
-                    return true;
-                  }
-                  return false;
-                });
-          }};
+  std::unique_ptr<Module> M = parseIRFile(file, Err, Ctx);
+
+  defineOmprtfReplacementFunctions(M);
+
+  std::vector<Instruction *> toRemove;
+
+  for (Function &F : *M) {
+    if (F.isDeclaration())
+      continue;
+
+    for (BasicBlock &BB : F) {
+      for (auto It = BB.begin(); It != BB.end();) {
+        Instruction *I = &*It++; // Advance iterator immediately
+
+        const DebugLoc &DL = I->getDebugLoc();
+        if (!DL)
+          continue;
+
+        std::string Path = DL->getFilename().str();
+        bool FileMatches = false;
+        for (const auto &Entry : TargetLines) {
+          if (Path.find(Entry.first) != std::string::npos ||
+              Entry.first.find(Path) != std::string::npos) {
+            if (Entry.second.count(DL.getLine())) {
+              FileMatches = true;
+              break;
+            }
+          }
+        }
+
+        if (!FileMatches)
+          continue;
+
+        if (CallInst *CI = dyn_cast<CallInst>(I)) {
+          Function *CalledF = CI->getCalledFunction();
+          if (CalledF && CalledF->getName().contains("__tgt_target_kernel")) {
+            IRBuilder<> Builder(CI);
+
+            for (const std::string &Name : FuncNames) {
+              Function *Func = M->getFunction(Name);
+              Builder.CreateCall(Func);
+            }
+
+            toRemove.push_back(CI);
+
+            errs() << "Replaced OpenMP call at " << Path << ":" << DL.getLine()
+                   << "\n";
+          }
+        }
+      }
+    }
+  }
+
+  for (Instruction *I : toRemove) {
+    I->eraseFromParent();
+  }
 }

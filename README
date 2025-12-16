@@ -1,0 +1,9 @@
+This is a program that uses a profiler to optimize programs that use OpenMP GPU Offloading. 
+
+With the exception of the profiler, which has been heavily modified, and the hash function used by the profile,
+which I did not modify, all software has been written by Brady Bangasser
+
+To build and run, simply run build.sh,
+then run the program
+
+./build/omprtf <yourfile>.ll

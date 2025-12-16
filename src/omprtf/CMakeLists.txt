@@ -19,6 +19,7 @@ target_include_directories(omprtf
     ${CMAKE_SOURCE_DIR}/src/cmeta
     ${CMAKE_SOURCE_DIR}/src/profiler/src
     ${CMAKE_SOURCE_DIR}/src/mreader
+    ${CMAKE_SOURCE_DIR}/src/opt_pass
 )
 
-target_link_libraries(omprtf PRIVATE cmeta logging protool mreader libprofiler LLVMSupport LLVMCore LLVMIRReader)
+target_link_libraries(omprtf PRIVATE cmeta logging protool mreader libprofiler LLVMSupport LLVMCore LLVMIRReader opt_pass)
