@@ -45,7 +45,7 @@ void replaceLinesWithFiveFunctions(
   std::map<std::string, std::set<uint32_t>> TargetLines;
   for (const auto &Info : LineInfos) {
     if (Info)
-      TargetLines[Info->FileName].insert(Info->Line);
+      TargetLines[Info->FunctionName].insert(Info->Line);
   }
 
   LLVMContext Ctx;
@@ -58,7 +58,7 @@ void replaceLinesWithFiveFunctions(
   std::vector<Instruction *> toRemove;
 
   for (Function &F : *M) {
-    if (F.isDeclaration())
+    if (F.isDeclaration() || TargetLines[F.getName().str()].empty())
       continue;
 
     for (BasicBlock &BB : F) {
@@ -67,21 +67,6 @@ void replaceLinesWithFiveFunctions(
 
         const DebugLoc &DL = I->getDebugLoc();
         if (!DL)
-          continue;
-
-        std::string Path = DL->getFilename().str();
-        bool FileMatches = false;
-        for (const auto &Entry : TargetLines) {
-          if (Path.find(Entry.first) != std::string::npos ||
-              Entry.first.find(Path) != std::string::npos) {
-            if (Entry.second.count(DL.getLine())) {
-              FileMatches = true;
-              break;
-            }
-          }
-        }
-
-        if (!FileMatches)
           continue;
 
         if (CallInst *CI = dyn_cast<CallInst>(I)) {
@@ -96,9 +81,12 @@ void replaceLinesWithFiveFunctions(
 
             toRemove.push_back(CI);
 
-            errs() << "Replaced OpenMP call at " << Path << ":" << DL.getLine()
-                   << "\n";
+            errs() << "Replaced OpenMP call at " << F.getName() << ":"
+                   << DL.getLine() << "\n";
           }
+        } else {
+          ERRORF("Invalid line, function %s:%d\n", F.getName().data(),
+                 DL.getLine());
         }
       }
     }
