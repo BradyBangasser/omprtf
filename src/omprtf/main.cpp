@@ -110,6 +110,7 @@ int main(int argc, const char *argv[]) {
   waitpid(pid, nullptr, 0);
 
   for (const auto &res : *profile_results) {
+    INFO("RESULT\n");
     std::vector<std::unique_ptr<llvm::DILineInfo>> lines;
     for (uint64_t addr : res->code) {
       lines.push_back(getlineinfo(program, addr));
