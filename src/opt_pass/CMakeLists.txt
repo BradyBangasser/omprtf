@@ -4,7 +4,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_library(opt_pass SHARED pass.cpp)
 
-target_include_directories(cmeta
+target_include_directories(opt_meta
     PRIVATE
         ${CMAKE_SOURCE_DIR}/src/logging
         ${LLVM_INCLUDE_DIRS}
@@ -12,7 +12,7 @@ target_include_directories(cmeta
 
 
 target_link_libraries(opt_pass
-    PUBLIC
+    PRIVATE
         LLVMSupport
         LLVMIRReader
         LLVMCore
