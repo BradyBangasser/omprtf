@@ -17,6 +17,6 @@ target_link_libraries(mreader
 
 target_include_directories(mreader PRIVATE ${CMAKE_SOURCE_DIR}/src/logging ${LLVM_INCLUDE_DIRS})
 
-add_executable(readmeta tool)
+add_executable(readmeta tool.cpp)
 target_link_libraries(readmeta PRIVATE logging mreader)
 target_include_directories(readmeta PRIVATE ${CMAKE_SOURCE_DIR}/src/logging ${CMAKE_SOURCE_DIR}/src/mreader)

@@ -7,6 +7,6 @@
 *.so
 *.a
 *.so
-.cache/*
+.cache
 
 build

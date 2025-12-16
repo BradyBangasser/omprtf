@@ -84,9 +84,6 @@ void replaceLinesWithFiveFunctions(
             errs() << "Replaced OpenMP call at " << F.getName() << ":"
                    << DL.getLine() << "\n";
           }
-        } else {
-          ERRORF("Invalid line, function %s:%d\n", F.getName().data(),
-                 DL.getLine());
         }
       }
     }
