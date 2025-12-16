@@ -112,7 +112,6 @@ void replaceLinesWithFiveFunctions(
 
   if (EC) {
     ERRORF("An error occured writing the file: %s\n", EC.message().data());
-    return 3;
   }
 
   M->print(Out, nullptr);
