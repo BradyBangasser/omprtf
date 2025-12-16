@@ -13,12 +13,8 @@ target_include_directories(opt_pass
 
 target_link_libraries(opt_pass
     PRIVATE
-        LLVMSupport
-        LLVMIRReader
-        LLVMCore
-        LLVMAsmParser
-        LLVMDebugInfoPDB
-        logging
+      LLVM
+      logging
 )
 
 set_target_properties(opt_pass PROPERTIES

@@ -6,13 +6,12 @@ set_target_properties(mreader PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(mreader
   PRIVATE logging
   PUBLIC
-    LLVMCore
-    LLVMSupport
-    LLVMObject
-    LLVMBitReader
-    LLVMBitstreamReader
-    LLVMDebugInfoDWARF
-    LLVMSymbolize
+      LLVMSupport
+      LLVMIRReader
+      LLVMCore
+      LLVMAsmParser
+      LLVMDebugInfoPDB
+      LLVMSymbolize
 )
 
 

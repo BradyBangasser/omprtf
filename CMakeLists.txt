@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
-
+project(omprtf C CXX)
+set(LLVM_LINK_LLVM_DYLIB ON)
 execute_process(
     COMMAND git submodule update --init --recursive
     # Run the command from the root of the source directory
@@ -30,7 +31,6 @@ file(MAKE_DIRECTORY ${CMAKE_TEST_OUTPUT_DIRECTORY})
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-project(omprtf C CXX)
 
 # Make sure LLVM is found
 find_package(LLVM REQUIRED CONFIG)

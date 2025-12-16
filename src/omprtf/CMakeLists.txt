@@ -22,4 +22,4 @@ target_include_directories(omprtf
     ${CMAKE_SOURCE_DIR}/src/opt_pass
 )
 
-target_link_libraries(omprtf PRIVATE cmeta logging protool mreader libprofiler LLVMSupport LLVMCore LLVMIRReader opt_pass)
+target_link_libraries(omprtf PRIVATE cmeta logging protool mreader libprofiler opt_pass)
