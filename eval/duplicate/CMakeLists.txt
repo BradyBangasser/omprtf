@@ -14,7 +14,7 @@ if(CUDAToolkit_FOUND AND OpenMP_FOUND)
 
   file(MAKE_DIRECTORY "${OUTPUT_BASE_NAME}")
 
-  set(OFFLOAD_FLAGS -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda)
+  set(OFFLOAD_FLAGS -fopenmp -fopenmp-targets=${OMP_TARGET_ARCH})
 
   add_executable(${SUBDIR_NAME}.out ${CMAKE_CURRENT_SOURCE_DIR}/main.c)
 

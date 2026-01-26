@@ -6,25 +6,26 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install dependencies for LLVM and building OpenMP
 RUN apt-get update && apt-get install -y \
-    build-essential \
-    cmake \
-    git \
-    wget \
-    curl \
-    ninja-build \
-    python3 \
-    ca-certificates \
-    nano \
-    vim \
-    bzip2 \
-    tar \
-    elfutils \
-    libdw-dev \
-    llvm-20 \
-    clang-20 \
-    lld-20 \
-    libomp-20-dev 
-    #&& rm -rf /var/lib/apt/lists/*
+  build-essential \
+  cmake \
+  git \
+  wget \
+  curl \
+  ninja-build \
+  python3 \
+  ca-certificates \
+  nano \
+  vim \
+  bzip2 \
+  tar \
+  elfutils \
+  libdw-dev \
+  llvm-20 \
+  clang-20 \
+  lld-20 \
+  libomp-20-dev \
+  libclang-20-dev
+#&& rm -rf /var/lib/apt/lists/*
 
 # Add ROCm repo key
 #RUN mkdir -p /etc/apt/keyrings && chmod 755 /etc/apt/keyrings
@@ -53,7 +54,13 @@ ENV LIBRARY_PATH="/usr/lib/llvm-20/lib:${LIBRARY_PATH}"
 ENV CUDA_ROOT=/usr/local/cuda-12.8
 ENV CUDA_PATH=/usr/local/cuda-12.8
 ENV CUDA_HOME=/usr/local/cuda-12.8
+ENV CFLAGS="-fopenmp --offload-arch=sm_80"
+ENV CXXFLAGS="-fopenmp --offload-arch=sm_80 -Wno-deprecated-declarations"
+ENV CC=clang-20
+ENV CXX=clang++-20
 # Verify installation
 RUN echo $PATH && echo $LD_LIBRARY_PATH
 RUN clang --version
-RUN git clone https://github.com/lmarzen/ompdataperf.git
+RUN git clone https://github.com/bradybangasser/omprtf.git /omprtf
+WORKDIR /omprtf
+RUN ./build.sh
